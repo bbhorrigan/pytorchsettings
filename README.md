@@ -1,6 +1,5 @@
 # My Personal PyTorch Settings
-
-Welcome to my GitHub repository where I store my personal PyTorch configurations. Here, you'll find settings that I've tailored for my own use in various machine learning projects.
+This is my GitHub repository where I store my personal PyTorch configurations. Here, you'll find settings that I've tailored for my own use in various machine learning projects.
 
 ## Overview
 
