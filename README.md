@@ -16,6 +16,6 @@ This repository includes various configuration files and scripts that I use to s
 To use these settings, clone this repository and install the required dependencies using the provided environment file:
 
 ```bash
-git clone https://github.com/your-username/your-repo-name.git
+git clone https://github.com/bbhorrigan/pytorchsettings.git
 cd your-repo-name
 conda env create -f environment.yml
