@@ -1,6 +1,11 @@
 import torch
 import datetime
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import os
 
+# Function to evaluate PyTorch settings
 def evaluate_pytorch_settings():
     settings = {}
     settings['PyTorch Version'] = torch.__version__
@@ -13,6 +18,7 @@ def evaluate_pytorch_settings():
         settings['CUDA Device Memory'] = torch.cuda.get_device_properties(torch.cuda.current_device()).total_memory / (1024**3) # Convert bytes to GB
     return settings
 
+# Function to log evaluation result
 def log_evaluation_result(result):
     with open("pytorch_settings_log.txt", "a") as log_file:
         log_file.write("Evaluation Date: " + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "\n")
@@ -20,12 +26,53 @@ def log_evaluation_result(result):
             log_file.write(f"{key}: {value}\n")
         log_file.write("\n")
 
+# Function to send email notification
+def send_email_notification(subject, body):
+    sender_email = "your_email@gmail.com"  # Update with your email
+    receiver_email = "recipient_email@example.com"  # Update with recipient's email
+    password = "your_email_password"  # Update with your email password
+
+    msg = MIMEMultipart()
+    msg['From'] = sender_email
+    msg['To'] = receiver_email
+    msg['Subject'] = subject
+    msg.attach(MIMEText(body, 'plain'))
+
+    try:
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(sender_email, password)
+        server.sendmail(sender_email, receiver_email, msg.as_string())
+        print("Email notification sent successfully.")
+    except Exception as e:
+        print(f"Error sending email notification: {e}")
+    finally:
+        server.quit()
+
+# Function to upload backup file to cloud storage
+def upload_to_cloud_storage(file_path):
+    # Implement code to upload file to cloud storage (e.g., Dropbox, Google Drive)
+    pass
+
+# Main function
 def main():
     result = evaluate_pytorch_settings()
     print("PyTorch Settings Evaluation Result:")
     for key, value in result.items():
         print(f"{key}: {value}")
     log_evaluation_result(result)
+
+    # Send email notification
+    subject = "PyTorch Settings Backup Complete"
+    body = "PyTorch settings have been successfully backed up."
+    send_email_notification(subject, body)
+
+    # Upload backup file to cloud storage
+    file_path = "pytorch_settings_log.txt"
+    if os.path.exists(file_path):
+        upload_to_cloud_storage(file_path)
+    else:
+        print("Backup file not found.")
 
 if __name__ == "__main__":
     main()
