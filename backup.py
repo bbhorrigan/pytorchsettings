@@ -4,6 +4,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import os
+from ftplib import FTP
 
 # Function to evaluate PyTorch settings
 def evaluate_pytorch_settings():
@@ -49,10 +50,20 @@ def send_email_notification(subject, body):
     finally:
         server.quit()
 
-# Function to upload backup file to cloud storage
-def upload_to_cloud_storage(file_path):
-    # Implement code to upload file to cloud storage (e.g., Dropbox, Google Drive)
-    pass
+# Function to upload backup file to FTP server
+def upload_to_ftp(file_path):
+    ftp_host = 'ftp.example.com'  # Update with FTP host
+    ftp_username = 'ftp_username'  # Update with FTP username
+    ftp_password = 'ftp_password'  # Update with FTP password
+
+    try:
+        with FTP(ftp_host) as ftp:
+            ftp.login(user=ftp_username, passwd=ftp_password)
+            with open(file_path, 'rb') as f:
+                ftp.storbinary(f'STOR {os.path.basename(file_path)}', f)
+        print("File uploaded to FTP server successfully.")
+    except Exception as e:
+        print(f"Error uploading file to FTP server: {e}")
 
 # Main function
 def main():
@@ -67,10 +78,10 @@ def main():
     body = "PyTorch settings have been successfully backed up."
     send_email_notification(subject, body)
 
-    # Upload backup file to cloud storage
+    # Upload backup file to FTP server
     file_path = "pytorch_settings_log.txt"
     if os.path.exists(file_path):
-        upload_to_cloud_storage(file_path)
+        upload_to_ftp(file_path)
     else:
         print("Backup file not found.")
 
