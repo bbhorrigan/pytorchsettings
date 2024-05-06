@@ -6,7 +6,7 @@ from email.mime.multipart import MIMEMultipart
 import os
 from ftplib import FTP
 
-# Function to import PyTorch settings from backup file
+# Function to import PyTorch settings from backup file, update the value of the files to the location on your machine
 def import_pytorch_settings(file_path):
     settings = {}
     try:
