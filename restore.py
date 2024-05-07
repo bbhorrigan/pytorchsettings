@@ -6,32 +6,19 @@ from email.mime.multipart import MIMEMultipart
 import os
 from ftplib import FTP
 
-# Function to evaluate PyTorch settings
-def evaluate_pytorch_settings():
+# Function to import PyTorch settings from backup file, update the value of the files to the location on your machine
+def import_pytorch_settings(file_path):
     settings = {}
     try:
-        settings['PyTorch Version'] = torch.__version__
-        settings['CUDA Availability'] = torch.cuda.is_available()
-        if torch.cuda.is_available():
-            settings['CUDA Version'] = torch.version.cuda
-            settings['CUDA Device Count'] = torch.cuda.device_count()
-            settings['CUDA Current Device'] = torch.cuda.current_device()
-            settings['CUDA Device Name'] = torch.cuda.get_device_name(torch.cuda.current_device())
-            settings['CUDA Device Memory'] = torch.cuda.get_device_properties(torch.cuda.current_device()).total_memory / (1024**3) # Convert bytes to GB
+        with open(file_path, "r") as backup_file:
+            lines = backup_file.readlines()
+            for line in lines:
+                if ":" in line:
+                    key, value = line.split(":")
+                    settings[key.strip()] = value.strip()
     except Exception as e:
-        print(f"Error evaluating PyTorch settings: {e}")
+        print(f"Error importing PyTorch settings: {e}")
     return settings
-
-# Function to log evaluation result
-def log_evaluation_result(result):
-    try:
-        with open("pytorch_settings_log.txt", "a") as log_file:
-            log_file.write("Evaluation Date: " + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "\n")
-            for key, value in result.items():
-                log_file.write(f"{key}: {value}\n")
-            log_file.write("\n")
-    except Exception as e:
-        print(f"Error logging evaluation result: {e}")
 
 # Function to send email notification
 def send_email_notification(subject, body):
@@ -74,21 +61,21 @@ def upload_to_ftp(file_path):
 # Main function
 def main():
     try:
-        result = evaluate_pytorch_settings()
-        print("PyTorch Settings Evaluation Result:")
-        for key, value in result.items():
+        # Import PyTorch settings from backup file
+        backup_file_path = "pytorch_settings_backup.txt"
+        imported_settings = import_pytorch_settings(backup_file_path)
+        print("PyTorch Settings Imported Successfully:")
+        for key, value in imported_settings.items():
             print(f"{key}: {value}")
-        log_evaluation_result(result)
 
         # Send email notification
-        subject = "PyTorch Settings Backup Complete"
-        body = "PyTorch settings have been successfully backed up."
+        subject = "PyTorch Settings Import Complete"
+        body = "PyTorch settings have been successfully imported."
         send_email_notification(subject, body)
 
         # Upload backup file to FTP server
-        file_path = "pytorch_settings_log.txt"
-        if os.path.exists(file_path):
-            upload_to_ftp(file_path)
+        if os.path.exists(backup_file_path):
+            upload_to_ftp(backup_file_path)
         else:
             print("Backup file not found.")
     except Exception as e:
