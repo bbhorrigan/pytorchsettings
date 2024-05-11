@@ -5,6 +5,15 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import os
 from ftplib import FTP
+import logging
+import configparser
+
+# Load configuration
+config = configparser.ConfigParser()
+config.read('config.ini')  # Assuming configuration details are stored in config.ini
+
+# Initialize logger
+logging.basicConfig(filename='pytorch_settings.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Function to evaluate PyTorch settings
 def evaluate_pytorch_settings():
@@ -19,7 +28,7 @@ def evaluate_pytorch_settings():
             settings['CUDA Device Name'] = torch.cuda.get_device_name(torch.cuda.current_device())
             settings['CUDA Device Memory'] = torch.cuda.get_device_properties(torch.cuda.current_device()).total_memory / (1024**3) # Convert bytes to GB
     except Exception as e:
-        print(f"Error evaluating PyTorch settings: {e}")
+        logging.error(f"Error evaluating PyTorch settings: {e}")
     return settings
 
 # Function to log evaluation result
@@ -31,13 +40,13 @@ def log_evaluation_result(result):
                 log_file.write(f"{key}: {value}\n")
             log_file.write("\n")
     except Exception as e:
-        print(f"Error logging evaluation result: {e}")
+        logging.error(f"Error logging evaluation result: {e}")
 
 # Function to send email notification
 def send_email_notification(subject, body):
-    sender_email = "your_email@gmail.com"  # Update with your email
-    receiver_email = "recipient_email@example.com"  # Update with recipient's email
-    password = "your_email_password"  # Update with your email password
+    sender_email = config['EMAIL']['SENDER_EMAIL']
+    receiver_email = config['EMAIL']['RECEIVER_EMAIL']
+    password = config['EMAIL']['PASSWORD']
 
     try:
         msg = MIMEMultipart()
@@ -46,38 +55,38 @@ def send_email_notification(subject, body):
         msg['Subject'] = subject
         msg.attach(MIMEText(body, 'plain'))
 
-        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server = smtplib.SMTP(config['EMAIL']['SMTP_SERVER'], int(config['EMAIL']['SMTP_PORT']))
         server.starttls()
         server.login(sender_email, password)
         server.sendmail(sender_email, receiver_email, msg.as_string())
-        print("Email notification sent successfully.")
+        logging.info("Email notification sent successfully.")
     except Exception as e:
-        print(f"Error sending email notification: {e}")
+        logging.error(f"Error sending email notification: {e}")
     finally:
         server.quit()
 
 # Function to upload backup file to FTP server
 def upload_to_ftp(file_path):
-    ftp_host = 'ftp.example.com'  # Update with FTP host
-    ftp_username = 'ftp_username'  # Update with FTP username
-    ftp_password = 'ftp_password'  # Update with FTP password
+    ftp_host = config['FTP']['HOST']
+    ftp_username = config['FTP']['USERNAME']
+    ftp_password = config['FTP']['PASSWORD']
 
     try:
         with FTP(ftp_host) as ftp:
             ftp.login(user=ftp_username, passwd=ftp_password)
             with open(file_path, 'rb') as f:
                 ftp.storbinary(f'STOR {os.path.basename(file_path)}', f)
-        print("File uploaded to FTP server successfully.")
+        logging.info("File uploaded to FTP server successfully.")
     except Exception as e:
-        print(f"Error uploading file to FTP server: {e}")
+        logging.error(f"Error uploading file to FTP server: {e}")
 
 # Main function
 def main():
     try:
         result = evaluate_pytorch_settings()
-        print("PyTorch Settings Evaluation Result:")
+        logging.info("PyTorch Settings Evaluation Result:")
         for key, value in result.items():
-            print(f"{key}: {value}")
+            logging.info(f"{key}: {value}")
         log_evaluation_result(result)
 
         # Send email notification
@@ -90,9 +99,9 @@ def main():
         if os.path.exists(file_path):
             upload_to_ftp(file_path)
         else:
-            print("Backup file not found.")
+            logging.error("Backup file not found.")
     except Exception as e:
-        print(f"An error occurred: {e}")
+        logging.error(f"An error occurred: {e}")
 
 if __name__ == "__main__":
     main()
