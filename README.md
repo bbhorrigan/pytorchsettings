@@ -1,11 +1,11 @@
 
 # PyTorch Settings
 
-Welcome to my PyTorch Settings repository! Here, you'll find configurations tailored for my personal use in various machine learning projects. These settings are designed to streamline my workflow and ensure consistency across different environments.  When I started using Pytorch, I realized that there are settings that I might have to move back and forth from different devices, beacuse of testing on different CPU sets. This is the utilities I wrote that allow me to move back and forth from machine to machine and copying my settings. I am going to build a utility to drop this into something like OneDrive or FTP. You will see some of that logic already built.
+Welcome to my PyTorch Settings repository! Here, you'll find configurations tailored for my personal use in various machine learning projects. These settings are designed to streamline my workflow and ensure consistency across different environments.  When I started using Pytorch, I realized that there are settings that I might have to move back and forth from different devices, beacuse of testing on different CPU sets. This is the collection of utilities I wrote that allow me to move back and forth from machine to machine and copying my settings. I am going to build a utility to drop this into something like OneDrive or FTP. You will see some of that logic already built.
 
 ## Overview
 
-This repository houses various configuration files and scripts that I utilize to set up PyTorch environments for my projects. These configurations encompass aspects such as device handling, seed settings for reproducibility, and performance optimizations.
+This repository houses various configuration files and scripts that I utilize to set up PyTorch environments for my projects. These configurations have aspects such as device handling, seed settings for reproducibility, and performance optimizations.
 
 ## Contents
 
