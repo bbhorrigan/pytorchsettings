@@ -1,12 +1,11 @@
-import torch
+import os
 import datetime
+import logging
+import configparser
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-import os
 from ftplib import FTP
-import logging
-import configparser
 
 # Load configuration
 config = configparser.ConfigParser()
