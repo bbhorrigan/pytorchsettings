@@ -6,6 +6,8 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from ftplib import FTP
+import torch
+import json
 
 # Load configuration
 config = configparser.ConfigParser()
@@ -79,6 +81,33 @@ def upload_to_ftp(file_path):
     except Exception as e:
         logging.error(f"Error uploading file to FTP server: {e}")
 
+# Function to save model and optimizer states
+def save_model_and_optimizer(model, optimizer, epoch, loss, path):
+    checkpoint = {
+        'model_state_dict': model.state_dict(),
+        'optimizer_state_dict': optimizer.state_dict(),
+        'epoch': epoch,
+        'loss': loss,
+    }
+    torch.save(checkpoint, path)
+
+# Function to load model and optimizer states
+def load_model_and_optimizer(model, optimizer, path):
+    checkpoint = torch.load(path)
+    model.load_state_dict(checkpoint['model_state_dict'])
+    optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+    return checkpoint['epoch'], checkpoint['loss']
+
+# Function to save training configurations
+def save_training_config(config_dict, path):
+    with open(path, 'w') as config_file:
+        json.dump(config_dict, config_file)
+
+# Function to load training configurations
+def load_training_config(path):
+    with open(path, 'r') as config_file:
+        return json.load(config_file)
+
 # Main function
 def main():
     try:
@@ -87,6 +116,21 @@ def main():
         for key, value in result.items():
             logging.info(f"{key}: {value}")
         log_evaluation_result(result)
+
+        # Save model and optimizer states
+        model = ... # Your model
+        optimizer = ... # Your optimizer
+        epoch = ... # Your current epoch
+        loss = ... # Your current loss
+        save_model_and_optimizer(model, optimizer, epoch, loss, 'path/to/checkpoint.pth')
+
+        # Save training configurations
+        training_config = {
+            'learning_rate': ... , # Your learning rate
+            'batch_size': ... , # Your batch size
+            'num_epochs': ... , # Your number of epochs
+        }
+        save_training_config(training_config, 'path/to/config.json')
 
         # Send email notification
         subject = "PyTorch Settings Backup Complete"
