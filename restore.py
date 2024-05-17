@@ -20,7 +20,7 @@ def import_pytorch_settings(file_path):
         print(f"Error importing PyTorch settings: {e}")
     return settings
 
-# Function to send email notification
+# Function to send email notification, change settings to match needs, comment out the rest.
 def send_email_notification(subject, body):
     sender_email = "your_email@gmail.com"  # Update with your email
     receiver_email = "recipient_email@example.com"  # Update with recipient's email
