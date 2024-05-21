@@ -43,7 +43,7 @@ def send_email_notification(subject, body):
     finally:
         server.quit()
 
-# Function to upload backup file to FTP server
+# Function to upload backup file to FTP server, make sure you can resolve the FTP server name. You can use IP address, confirm port is open.
 def upload_to_ftp(file_path):
     ftp_host = 'ftp.example.com'  # Update with FTP host
     ftp_username = 'ftp_username'  # Update with FTP username
