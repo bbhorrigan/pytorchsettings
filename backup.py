@@ -16,7 +16,7 @@ config.read('config.ini')  # Assuming configuration details are stored in config
 # Initialize logger
 logging.basicConfig(filename='pytorch_settings.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# Function to evaluate PyTorch settings
+# Function to evaluate PyTorch settings stored no your machine
 def evaluate_pytorch_settings():
     settings = {}
     try:
