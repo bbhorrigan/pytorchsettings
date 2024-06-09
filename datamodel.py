@@ -15,7 +15,7 @@ X_train, X_test, y_train, y_test = train_test_split(X_linear, y_linear, test_siz
 class LinearRegressionModel(nn.Module):
     def __init__(self):
         super(LinearRegressionModel, self).__init__()
-        self.linear = nn.Linear(1, 1)  # Input size: 1, Output size: 1
+        self.linear = nn.Linear(1, 1)
 
     def forward(self, x):
         return self.linear(x)
