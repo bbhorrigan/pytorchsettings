@@ -12,7 +12,7 @@ from typing import Any, Dict, Tuple
 import matplotlib.pyplot as plt
 from fpdf import FPDF
 
-# Load configuration
+# Load configuration system
 config = configparser.ConfigParser()
 config.read('config.ini')  # Assuming configuration details are stored in config.ini
 
