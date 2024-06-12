@@ -8,6 +8,7 @@ from email.mime.multipart import MIMEMultipart
 from ftplib import FTP
 import torch
 import json
+from typing import Any, Dict, Tuple
 
 # Load configuration
 config = configparser.ConfigParser()
@@ -16,24 +17,23 @@ config.read('config.ini')  # Assuming configuration details are stored in config
 # Initialize logger
 logging.basicConfig(filename='pytorch_settings.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# Function to evaluate PyTorch settings stored no your machine
-def evaluate_pytorch_settings():
+def evaluate_pytorch_settings() -> Dict[str, Any]:
     settings = {}
     try:
         settings['PyTorch Version'] = torch.__version__
         settings['CUDA Availability'] = torch.cuda.is_available()
         if torch.cuda.is_available():
+            current_device = torch.cuda.current_device()
             settings['CUDA Version'] = torch.version.cuda
             settings['CUDA Device Count'] = torch.cuda.device_count()
-            settings['CUDA Current Device'] = torch.cuda.current_device()
-            settings['CUDA Device Name'] = torch.cuda.get_device_name(torch.cuda.current_device())
-            settings['CUDA Device Memory'] = torch.cuda.get_device_properties(torch.cuda.current_device()).total_memory / (1024**3) # Convert bytes to GB
+            settings['CUDA Current Device'] = current_device
+            settings['CUDA Device Name'] = torch.cuda.get_device_name(current_device)
+            settings['CUDA Device Memory'] = torch.cuda.get_device_properties(current_device).total_memory / (1024**3)  # Convert bytes to GB
     except Exception as e:
         logging.error(f"Error evaluating PyTorch settings: {e}")
     return settings
 
-# Function to log evaluation result
-def log_evaluation_result(result):
+def log_evaluation_result(result: Dict[str, Any]) -> None:
     try:
         with open("pytorch_settings_log.txt", "a") as log_file:
             log_file.write("Evaluation Date: " + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "\n")
@@ -43,11 +43,10 @@ def log_evaluation_result(result):
     except Exception as e:
         logging.error(f"Error logging evaluation result: {e}")
 
-# Function to send email notification
-def send_email_notification(subject, body):
-    sender_email = config['EMAIL']['SENDER_EMAIL']
-    receiver_email = config['EMAIL']['RECEIVER_EMAIL']
-    password = config['EMAIL']['PASSWORD']
+def send_email_notification(subject: str, body: str) -> None:
+    sender_email = os.getenv('SENDER_EMAIL', config['EMAIL']['SENDER_EMAIL'])
+    receiver_email = os.getenv('RECEIVER_EMAIL', config['EMAIL']['RECEIVER_EMAIL'])
+    password = os.getenv('EMAIL_PASSWORD', config['EMAIL']['PASSWORD'])
 
     try:
         msg = MIMEMultipart()
@@ -56,18 +55,15 @@ def send_email_notification(subject, body):
         msg['Subject'] = subject
         msg.attach(MIMEText(body, 'plain'))
 
-        server = smtplib.SMTP(config['EMAIL']['SMTP_SERVER'], int(config['EMAIL']['SMTP_PORT']))
-        server.starttls()
-        server.login(sender_email, password)
-        server.sendmail(sender_email, receiver_email, msg.as_string())
-        logging.info("Email notification sent successfully.")
+        with smtplib.SMTP(config['EMAIL']['SMTP_SERVER'], int(config['EMAIL']['SMTP_PORT'])) as server:
+            server.starttls()
+            server.login(sender_email, password)
+            server.sendmail(sender_email, receiver_email, msg.as_string())
+            logging.info("Email notification sent successfully.")
     except Exception as e:
         logging.error(f"Error sending email notification: {e}")
-    finally:
-        server.quit()
 
-# Function to upload backup file to FTP server
-def upload_to_ftp(file_path):
+def upload_to_ftp(file_path: str) -> None:
     ftp_host = config['FTP']['HOST']
     ftp_username = config['FTP']['USERNAME']
     ftp_password = config['FTP']['PASSWORD']
@@ -81,8 +77,7 @@ def upload_to_ftp(file_path):
     except Exception as e:
         logging.error(f"Error uploading file to FTP server: {e}")
 
-# Function to save model and optimizer states
-def save_model_and_optimizer(model, optimizer, epoch, loss, path):
+def save_model_and_optimizer(model: torch.nn.Module, optimizer: torch.optim.Optimizer, epoch: int, loss: float, path: str) -> None:
     checkpoint = {
         'model_state_dict': model.state_dict(),
         'optimizer_state_dict': optimizer.state_dict(),
@@ -91,53 +86,50 @@ def save_model_and_optimizer(model, optimizer, epoch, loss, path):
     }
     torch.save(checkpoint, path)
 
-# Function to load model and optimizer states
-def load_model_and_optimizer(model, optimizer, path):
+def load_model_and_optimizer(model: torch.nn.Module, optimizer: torch.optim.Optimizer, path: str) -> Tuple[int, float]:
     checkpoint = torch.load(path)
     model.load_state_dict(checkpoint['model_state_dict'])
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     return checkpoint['epoch'], checkpoint['loss']
 
-# Function to save training configurations
-def save_training_config(config_dict, path):
+def save_training_config(config_dict: Dict[str, Any], path: str) -> None:
     with open(path, 'w') as config_file:
         json.dump(config_dict, config_file)
 
-# Function to load training configurations
-def load_training_config(path):
+def load_training_config(path: str) -> Dict[str, Any]:
     with open(path, 'r') as config_file:
         return json.load(config_file)
 
-# Main function
+def backup_pytorch_settings():
+    result = evaluate_pytorch_settings()
+    logging.info("PyTorch Settings Evaluation Result:")
+    for key, value in result.items():
+        logging.info(f"{key}: {value}")
+    log_evaluation_result(result)
+
 def main():
     try:
-        result = evaluate_pytorch_settings()
-        logging.info("PyTorch Settings Evaluation Result:")
-        for key, value in result.items():
-            logging.info(f"{key}: {value}")
-        log_evaluation_result(result)
+        backup_pytorch_settings()
 
-        # Save model and optimizer states
-        model = ... # Your model
-        optimizer = ... # Your optimizer
-        epoch = ... # Your current epoch
-        loss = ... # Your current loss
-        save_model_and_optimizer(model, optimizer, epoch, loss, 'path/to/checkpoint.pth')
+        # Dummy placeholders for model, optimizer, etc.
+        model = torch.nn.Linear(10, 2)
+        optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
+        epoch = 1
+        loss = 0.1
 
-        # Save training configurations
+        save_model_and_optimizer(model, optimizer, epoch, loss, 'checkpoint.pth')
+
         training_config = {
-            'learning_rate': ... , # Your learning rate
-            'batch_size': ... , # Your batch size
-            'num_epochs': ... , # Your number of epochs
+            'learning_rate': 0.01,
+            'batch_size': 32,
+            'num_epochs': 10,
         }
-        save_training_config(training_config, 'path/to/config.json')
+        save_training_config(training_config, 'config.json')
 
-        # Send email notification
         subject = "PyTorch Settings Backup Complete"
         body = "PyTorch settings have been successfully backed up."
         send_email_notification(subject, body)
 
-        # Upload backup file to FTP server
         file_path = "pytorch_settings_log.txt"
         if os.path.exists(file_path):
             upload_to_ftp(file_path)

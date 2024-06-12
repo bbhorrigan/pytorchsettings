@@ -2,7 +2,7 @@
 import tkinter as tk
 from tkinter import messagebox
 
-# Define the action for each button
+# Define the action for each button listed
 def release_gpu(gpu_id):
     messagebox.showinfo("GPU Release", f"GPU {gpu_id} has been released.")
     print(f"GPU {gpu_id} has been released.")
