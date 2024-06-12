@@ -1,5 +1,7 @@
 
-# PyTorch Settings
+# PyTorch Settings Alpha
+
+This is the Alpha pre release of pytorch settings. You will find that this is mostly test code to see how it works.
 
 These are configurations tailored for my machine in various machine learning projects. These settings are designed to streamline my workflow and ensure consistency across different environments.  When I started using Pytorch, I realized that there are settings that I might have to move back and forth from different devices, beacuse of testing on different CPU sets. This is the collection of utilities I wrote that allow me to move back and forth from machine to machine and copying my settings. I am going to build a utility to drop this into something like OneDrive or FTP. You will see some of that logic already built.
 
