@@ -198,3 +198,35 @@ def main():
 
 if __name__ == "__main__":
     main()
+import time
+from functools import wraps
+
+def retry_operation(max_retries: int = 3, delay: int = 5):
+    def decorator_retry(func):
+        @wraps(func)
+        def wrapper_retry(*args, **kwargs):
+            retries = 0
+            while retries < max_retries:
+                try:
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    retries += 1
+                    logging.warning(f"Attempt {retries}/{max_retries} failed: {e}. Retrying in {delay} seconds...")
+                    time.sleep(delay)
+            logging.error(f"All {max_retries} attempts failed for {func.__name__}.")
+            return None  # Returning None or some fallback value if all retries fail
+        return wrapper_retry
+    return decorator_retry
+
+# Applying the retry decorator to critical functions
+@retry_operation()
+def send_email_notification(subject: str, body: str) -> None:
+    # Your existing send_email_notification code
+    pass  # Replace with the actual function code
+
+@retry_operation()
+def upload_to_ftp(file_path: str) -> None:
+    # Your existing upload_to_ftp code
+    pass  # Replace with the actual function code
+
+# Similarly, add @retry_operation() to other critical functions as needed
