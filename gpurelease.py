@@ -15,7 +15,7 @@ root.title("GPU Release Application")
 window_width = 300
 window_height = 200
 
-# Get the screen dimension
+# Get the screen dimension full
 screen_width = root.winfo_screenwidth()
 screen_height = root.winfo_screenheight()
 
