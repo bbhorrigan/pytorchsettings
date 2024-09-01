@@ -7,7 +7,7 @@ import torch.optim as optim
 x_train = torch.tensor([[1.0], [2.0], [3.0], [4.0]], dtype=torch.float32)
 y_train = torch.tensor([[2.0], [4.0], [6.0], [8.0]], dtype=torch.float32)
 
-# Step 2: Define the model
+# Step 2: Define the model to use
 class LinearRegression(nn.Module):
     def __init__(self):
         super(LinearRegression, self).__init__()
