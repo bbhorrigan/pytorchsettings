@@ -6,57 +6,55 @@ from sklearn.model_selection import train_test_split
 # Set random seed for reproducibility
 torch.manual_seed(42)
 
-# Generate fake data
-X_linear = torch.randn(100, 1)  # 100 samples, 1 feature
-y_linear = 2 * X_linear + 3 + torch.randn(100, 1) * 0.1  # y = 2x + 3 + noise
+# Generate synthetic linear data
+X = torch.randn(100, 1)  # 100 samples, 1 feature
+y = 2 * X + 3 + torch.randn(100, 1) * 0.1  # y = 2x + 3 + some noise
 
-# Split data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(X_linear, y_linear, test_size=0.2, random_state=42)
+# Split the data into training and testing sets (80% train, 20% test)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Define the model
-class LinearRegressionModel(nn.Module):
+# Define a simple linear regression model
+class LinearRegression(nn.Module):
     def __init__(self):
-        super(LinearRegressionModel, self).__init__()
-        self.linear = nn.Linear(1, 1)
+        super(LinearRegression, self).__init__()
+        self.linear = nn.Linear(1, 1)  # 1 input, 1 output
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x):
         return self.linear(x)
 
-# Instantiate the model
-model_linear = LinearRegressionModel()
+# Instantiate the model, define the loss function and optimizer
+model = LinearRegression()
+loss_fn = nn.MSELoss()  # Mean Squared Error Loss
+optimizer = optim.SGD(model.parameters(), lr=0.01)
 
-# Define loss function and optimizer
-criterion = nn.MSELoss()
-optimizer = optim.SGD(model_linear.parameters(), lr=0.01)
-
-# Define training function
-def train_model(model: nn.Module, criterion: nn.Module, optimizer: optim.Optimizer, 
-                X_train: torch.Tensor, y_train: torch.Tensor, num_epochs: int = 100) -> None:
+# Function to train the model
+def train(model, loss_fn, optimizer, X_train, y_train, epochs=100):
     model.train()
-    for epoch in range(num_epochs):
+    for epoch in range(epochs):
         # Forward pass
-        outputs = model(X_train)
-        loss = criterion(outputs, y_train)
+        predictions = model(X_train)
+        loss = loss_fn(predictions, y_train)
 
-        # Backward pass and optimization
+        # Backpropagation and optimization
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
+        # Print loss every 10 epochs
         if (epoch + 1) % 10 == 0:
-            print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}')
+            print(f'Epoch {epoch + 1}/{epochs}, Loss: {loss.item():.4f}')
 
-# Define evaluation function
-def evaluate_model(model: nn.Module, criterion: nn.Module, X_test: torch.Tensor, y_test: torch.Tensor) -> float:
-    model.eval()
+# Function to evaluate the model on test data
+def evaluate(model, loss_fn, X_test, y_test):
+    model.eval()  # Switch to evaluation mode
     with torch.no_grad():
-        predicted = model(X_test)
-        test_loss = criterion(predicted, y_test)
+        predictions = model(X_test)
+        test_loss = loss_fn(predictions, y_test)
     return test_loss.item()
 
 # Train the model
-train_model(model_linear, criterion, optimizer, X_train, y_train, num_epochs=100)
+train(model, loss_fn, optimizer, X_train, y_train)
 
 # Evaluate the model
-test_loss = evaluate_model(model_linear, criterion, X_test, y_test)
+test_loss = evaluate(model, loss_fn, X_test, y_test)
 print(f'Test Loss: {test_loss:.4f}')
